@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "setup-guide": "echo See SETUP-GUIDE.md for detailed setup instructions"
   },
   "dependencies": {
     "@supabase/ssr": "^0.9.0",

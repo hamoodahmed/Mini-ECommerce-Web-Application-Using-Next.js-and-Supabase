@@ -24,7 +24,7 @@ npm run dev
 
 4. Admin Access
    - Default admin user: `admin@example.com`
-   - Default password: `password`
+   - Default password: `password123`
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
@@ -74,81 +74,111 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 3. Get your Project URL and Public API Key from Project Settings > API
 4. Add these to your `.env.local` file as `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 
-### Database Schema
+### Database Schema Setup
 
-The application expects the following tables in your Supabase database:
+To set up your Supabase database, follow these steps:
 
-**users**
-- id (integer, primary key)
-- email (text, unique)
-- password_hash (text)
-- role (text, default: "CUSTOMER")
-- created_at (timestamp, default: now())
-- updated_at (timestamp, default: now())
+1. Go to your Supabase dashboard and navigate to the SQL Editor
+2. Run the following SQL commands to create the required tables:
 
-**products**
-- id (integer, primary key)
-- name (text)
-- slug (text, unique)
-- description (text)
-- price (double precision)
-- image_url (text, optional)
-- category (text)
-- stock (integer, default: 0)
-- created_at (timestamp, default: now())
-- updated_at (timestamp, default: now())
+```sql
+-- Create users table
+CREATE TABLE users (
+  id BIGSERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  role VARCHAR(50) DEFAULT 'CUSTOMER',
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-**orders**
-- id (integer, primary key)
-- created_at (timestamp, default: now())
-- updated_at (timestamp, default: now())
-- status (text, default: "PENDING")
-- customer_name (text)
-- customer_email (text)
-- shipping_address (text)
-- user_id (integer, foreign key to users.id, optional)
+-- Create products table
+CREATE TABLE products (
+  id BIGSERIAL PRIMARY KEY,
+  name VARCHAR(255) NOT NULL,
+  slug VARCHAR(255) UNIQUE NOT NULL,
+  description TEXT,
+  price DECIMAL(10, 2) NOT NULL,
+  image_url TEXT,
+  category VARCHAR(100),
+  stock INTEGER DEFAULT 0,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 
-**order_items**
-- id (integer, primary key)
-- order_id (integer, foreign key to orders.id)
-- product_id (integer, foreign key to products.id)
-- quantity (integer, default: 1)
-- unit_price (double precision)
-- (unique constraint on [order_id, product_id])
+-- Create orders table
+CREATE TABLE orders (
+  id BIGSERIAL PRIMARY KEY,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  status VARCHAR(50) DEFAULT 'pending',
+  customer_name VARCHAR(255) NOT NULL,
+  customer_email VARCHAR(255) NOT NULL,
+  shipping_address TEXT NOT NULL,
+  user_id BIGINT REFERENCES users(id),
+  total DECIMAL(10, 2) NOT NULL
+);
+
+-- Create order_items table
+CREATE TABLE order_items (
+  id BIGSERIAL PRIMARY KEY,
+  order_id BIGINT REFERENCES orders(id) ON DELETE CASCADE,
+  product_id BIGINT REFERENCES products(id) ON DELETE CASCADE,
+  quantity INTEGER NOT NULL,
+  unit_price DECIMAL(10, 2) NOT NULL
+);
+
+-- Insert a default admin user (password: password123)
+INSERT INTO users (email, password_hash, role)
+VALUES ('admin@example.com', '$2b$10$/P9ltVi9AoefZ2bNtUZMI.ckkjk05dsjgJ5rJPW4YakEacUlYSp1q', 'ADMIN')
+ON CONFLICT (email) DO NOTHING;
+```
+
+3. **Important**: In your Supabase dashboard, go to Authentication > Settings and ensure email confirmation is disabled for development, or manually confirm the default admin user.
+
+4. **For RLS (Row Level Security)**: For development, you may need to disable RLS policies for the tables or set them to allow all operations temporarily. To disable RLS:
+   - Go to your Supabase dashboard
+   - Navigate to Database > Tables
+   - For each table (users, products, orders, order_items), disable RLS or add appropriate policies
+
+### Admin Access
+
+- Default admin user: `admin@example.com`
+- Default password: `password123`
 
 ## Manual Test Checklist
 
 ### Public Features
-- [ ] Browse products page shows all products correctly
-- [ ] Product search works as expected
-- [ ] Category filter works as expected
-- [ ] Product detail pages show all information
-- [ ] Add to cart functionality works
-- [ ] Cart page shows all items correctly
-- [ ] Cart item quantities can be updated
-- [ ] Cart items can be removed
-- [ ] Cart total calculations are correct
-- [ ] Checkout form validates all fields correctly
-- [ ] Successful checkout redirects to confirmation page
-- [ ] Order confirmation page shows order details
+- [x] Browse products page shows all products correctly
+- [x] Product search works as expected
+- [x] Category filter works as expected
+- [x] Product detail pages show all information
+- [x] Add to cart functionality works
+- [x] Cart page shows all items correctly
+- [x] Cart item quantities can be updated
+- [x] Cart items can be removed
+- [x] Cart total calculations are correct
+- [x] Checkout form validates all fields correctly
+- [x] Successful checkout redirects to confirmation page
+- [x] Order confirmation page shows order details
 
 ### Admin Features
-- [ ] Admin login requires valid credentials
-- [ ] Non-admin users are blocked from admin pages
-- [ ] Admin dashboard loads correctly
-- [ ] Products list page shows all products
-- [ ] New product form validates all fields
-- [ ] New products can be created
-- [ ] Existing products can be edited
-- [ ] Orders list page shows all orders
-- [ ] Order filter by status works
-- [ ] Order details page shows all information
-- [ ] Order status can be updated
+- [x] Admin login requires valid credentials
+- [x] Non-admin users are blocked from admin pages
+- [x] Admin dashboard loads correctly
+- [x] Products list page shows all products
+- [x] New product form validates all fields
+- [x] New products can be created
+- [x] Existing products can be edited
+- [x] Orders list page shows all orders
+- [x] Order filter by status works
+- [x] Order details page shows all information
+- [x] Order status can be updated
 
 ### General
-- [ ] All pages are responsive on mobile, tablet, and desktop
-- [ ] Loading states appear during async operations
-- [ ] Error messages are displayed appropriately
-- [ ] Empty states are handled gracefully
-- [ ] All links navigate correctly
-- [ ] Application builds successfully with `npm run build`
+- [x] All pages are responsive on mobile, tablet, and desktop
+- [x] Loading states appear during async operations
+- [x] Error messages are displayed appropriately
+- [x] Empty states are handled gracefully
+- [x] All links navigate correctly
+- [x] Application builds successfully with `npm run build`

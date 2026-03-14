@@ -4,16 +4,58 @@
 
 :root {
   --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --background-start-rgb: 249, 250, 251;
+  --background-end-rgb: 249, 250, 251;
+  --primary-color: 37, 99, 235; /* blue-600 */
+  --secondary-color: 245, 158, 11; /* amber-500 */
+  --accent-color: 139, 92, 246; /* violet-500 */
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: rgb(var(--background-start-rgb));
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Custom utility classes */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Product image container */
+.product-image-container {
+  background-color: #f8fafc; /* slate-50 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.product-image-container img {
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.product-image-container:hover img {
+  transform: scale(1.05);
 }

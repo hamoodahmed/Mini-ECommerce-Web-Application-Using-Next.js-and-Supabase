@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     // Find user in database
     const { data: user, error } = await supabase
       .from('users')
-      .select('*')
+      .select('id, email, password_hash, role')
       .eq('email', email)
       .single();
 
@@ -30,17 +30,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if the password is correct
+    // Verify password - compare provided password with the stored hashed password
     const isValidPassword = await bcrypt.compare(password, user.password_hash);
+
     if (!isValidPassword) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
         { status: 401 }
       );
     }
-
-    // Note: We allow both ADMIN and CUSTOMER roles to login
-    // Previously this only allowed ADMIN users, but now we support general users too
 
     // In a real app, you would create a JWT token here
     // For this MVP, we'll just return the user info
@@ -50,7 +48,6 @@ export async function POST(request: Request) {
       message: 'Login successful',
     });
   } catch (error) {
-    console.error('Login error:', error);
     return NextResponse.json(
       { error: 'An error occurred during login' },
       { status: 500 }

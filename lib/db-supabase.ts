@@ -132,7 +132,7 @@ export const db = {
     },
 
     async count({ where = {} }: { where?: { name?: { contains?: string }; category?: { equals?: string } } } = {}) {
-      let query = supabase.from('products').select('*', { count: true, head: true });
+      let query = supabase.from('products').select('*', { count: 'exact', head: true });
 
       if (where.name?.contains) {
         query = query.ilike('name', `%${where.name.contains}%`);

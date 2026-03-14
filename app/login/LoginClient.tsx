@@ -1,12 +1,18 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/context/auth-context';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import Link from 'next/link';
 
-export default function AdminLoginPage() {
+function LoginContent() {
+  const { login } = useAuth();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
+
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -14,9 +20,6 @@ export default function AdminLoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  const router = useRouter();
-  const { login } = useAuth();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -64,7 +67,7 @@ export default function AdminLoginPage() {
 
     try {
       await login(formData.email, formData.password);
-      router.push('/admin');
+      router.push(callbackUrl);
       router.refresh();
     } catch (err) {
       console.error('Login error:', err);
@@ -78,8 +81,8 @@ export default function AdminLoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-full bg-blue-600 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
@@ -87,14 +90,14 @@ export default function AdminLoginPage() {
           <p className="mt-2 text-sm text-gray-600">Welcome back! Please enter your details</p>
         </div>
 
-        <div className="bg-white shadow-xl rounded-lg p-6 sm:p-8">
+        <div className="bg-white shadow-xl rounded-2xl p-8">
           {generalError && (
-            <div className="mb-4 bg-red-50 border border-red-200 rounded-md p-4">
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4">
               <p className="text-sm text-red-700">{generalError}</p>
             </div>
           )}
 
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="space-y-6">
             <Input
               label="Email address"
               id="email"
@@ -139,7 +142,7 @@ export default function AdminLoginPage() {
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full py-3"
               loading={loading}
               variant="primary"
             >
@@ -147,26 +150,26 @@ export default function AdminLoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6">
+          <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">
+                <span className="px-4 bg-white text-gray-500">
                   Or continue with
                 </span>
               </div>
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" className="py-3">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12.24 10.285V14.4h6.806c-.275 1.765-2.056 5.174-6.806 5.174-4.095 0-7.439-3.389-7.439-7.574s3.345-7.574 7.439-7.574c2.33 0 3.891.989 4.785 1.849l3.254-3.138C18.189 1.186 15.479 0 12.24 0c-6.635 0-12 5.365-12 12s5.365 12 12 12c6.926 0 11.52-4.869 11.52-11.726 0-.788-.085-1.39-.189-1.989H12.24z"/>
                 </svg>
                 <span className="ml-2">Google</span>
               </Button>
-              <Button variant="outline" type="button">
+              <Button variant="outline" type="button" className="py-3">
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                 </svg>
@@ -178,11 +181,19 @@ export default function AdminLoginPage() {
 
         <p className="mt-6 text-center text-sm text-gray-500">
           Don't have an account?{' '}
-          <a href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+          <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
             Sign up
-          </a>
+          </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+export default function LoginClient() {
+  return (
+    <Suspense fallback={<div className="max-w-md mx-auto mt-10"><div className="bg-white shadow-md rounded-lg p-6 text-center">Loading...</div></div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
